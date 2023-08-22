@@ -3,7 +3,7 @@
     "nisect": "./index.js"
   },
   "name": "@balazsorban44/nisect",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "type": "module",
   "exports": "./index.js",
