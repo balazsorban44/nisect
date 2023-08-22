@@ -3,7 +3,6 @@
 
 import readline from "node:readline"
 import { execaCommand, execa } from "execa"
-import { green } from "yoctocolors"
 import { Command } from "commander"
 
 import { getReleases } from "./versions.js"

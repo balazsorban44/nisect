@@ -5,8 +5,7 @@ export async function getReleases(perPage = 100) {
   try {
     const response = await fetch(apiUrl)
     const data = await response.json()
-    const releases = data.map((release) => release.tag_name)
-    return releases.toReversed()
+    return data.map((release) => release.tag_name).reverse()
   } catch (error) {
     console.error(`Error fetching releases: ${error.message}`)
     return []
