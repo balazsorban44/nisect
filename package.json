@@ -2,7 +2,7 @@
   "bin": {
     "nisect": "./index.js"
   },
-  "name": "@balazsorban44/nisect",
+  "name": "@balazsorban/nisect",
   "version": "0.0.1",
   "description": "",
   "type": "module",
