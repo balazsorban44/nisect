@@ -1,0 +1,28 @@
+{
+  "bin": {
+    "nisect": "./index.js"
+  },
+  "name": "@balazsorban44/nisect",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "exports": "./index.js",
+  "imports": {
+    "#types.js": "./types.js"
+  },
+  "keywords": [],
+  "author": "Balázs Orbán <info@balazsorban.com>",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "execa": "^8.0.1",
+    "prompts": "^2.4.2",
+    "yoctocolors": "^1.0.0"
+  },
+  "engines": {
+    "node": "^20"
+  },
+  "prettier": {
+    "semi": false
+  }
+}
