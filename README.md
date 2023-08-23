@@ -2,7 +2,7 @@
 
 Track down which version of a package introduced a bug.
 
-> (Next.js + bisect = nisect. Name pending...)
+> Next.js + bisect = nisect. Name pending...
 
 Inspired by [`vercel bisect`](https://vercel.com/docs/cli/bisect).
 
