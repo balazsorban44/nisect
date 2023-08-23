@@ -6,28 +6,26 @@ import { execaCommand, execa } from "execa"
 import { Command } from "commander"
 
 import { getReleases } from "./versions.js"
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-})
-
-async function update(version) {
-  const dependencyName = "next"
-  try {
-    await execa("pnpm", ["i", `${dependencyName}@${version}`], {
-      stdio: "inherit",
-    })
-    console.log(`Dependency ${dependencyName} updated to version ${version}`)
-  } catch (error) {
-    console.error(`Error updating or installing packages: ${error.message}`)
-  }
-}
-
-let version = null
+import { bold, gray } from "yoctocolors"
 
 /** @type {import("execa").ExecaChildProcess<string> | null} */
 let runningChildProcess = null
+let version = null
+
+const rl = readline
+  .createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  .on("SIGINT", () => {
+    if (runningChildProcess) {
+      // Kill the child process if the user presses Ctrl+C
+      runningChildProcess?.kill("SIGINT")
+      runningChildProcess = null
+    } else {
+      process.exit(0)
+    }
+  })
 
 async function search(versions, start, end, onSuccess, command) {
   if (start > end) {
@@ -36,59 +34,58 @@ async function search(versions, start, end, onSuccess, command) {
   }
 
   const mid = Math.floor((start + end) / 2)
-  const currentVersion = versions[mid]
-  version = currentVersion
-
-  await update(currentVersion)
-
-  runningChildProcess = execaCommand(command, { stdio: "inherit" })
+  console.log(
+    gray(
+      `Max remaining iterations: ${bold(Math.ceil(Math.log2(mid)).toString())}`
+    )
+  )
+  version = versions[mid]
 
   try {
-    await runningChildProcess
+    await installUpdate(version)
+
+    if (command === "dev") {
+      console.log("🏃 Running `next dev`...\n")
+      runningChildProcess = execaCommand("pnpm next dev", { stdio: "inherit" })
+      await runningChildProcess
+    } else {
+      console.log(
+        "🏗️ Building with `next build` and start with `next start`...\n"
+      )
+      runningChildProcess = execaCommand("pnpm next build", {
+        stdio: "inherit",
+      })
+      await runningChildProcess
+      runningChildProcess = execaCommand("pnpm next start", {
+        stdio: "inherit",
+      })
+    }
   } catch (error) {
     if (error.killed) {
-      rl.question(`Does version ${currentVersion} work? (y/n): `, (answer) => {
-        if (answer.toLowerCase() === "y") {
-          search(versions, mid + 1, end, onSuccess, command)
-        } else {
-          search(versions, start, mid - 1, onSuccess, command)
+      rl.question(
+        `\n❓ Did version "${version}" work? (${bold("y")}/n): `,
+        (answer) => {
+          if (!answer || answer.toLowerCase() === "n") {
+            return search(versions, start, mid - 1, onSuccess, command)
+          }
+          return search(versions, mid + 1, end, onSuccess, command)
         }
-      })
+      )
     } else {
       throw error
     }
   }
 }
 
-rl.on("SIGINT", () => {
-  if (runningChildProcess) {
-    runningChildProcess?.kill("SIGINT")
-    runningChildProcess = null
-  } else {
-    process.exit(0)
-  }
-})
-
 const opts = new Command("nisect")
-  .option(
-    "-C, --command <command>",
-    "command to run between version bumps",
-    "pnpm next dev"
-  )
+  .option("-D, --dev", "run 'next dev'", true)
+  .option("-P, --production", "run 'next build && next start'")
   .option("--per-page <number>", "number of last releases to search in", "100")
   .parse(process.argv)
   .opts()
 
+console.log("🔎 Searching for the first broken version of Next.js")
 const releases = await getReleases(opts.perPage)
-
-console.log(
-  [
-    "Let's find the first broken release.",
-    `Searching in ${releases.length} releases, between ${releases.at(
-      0
-    )} and ${releases.at(-1)}`,
-  ].join("\n")
-)
 
 await search(
   releases,
@@ -103,5 +100,10 @@ await search(
       console.log("❌ No matching version found.")
     }
   },
-  opts.command
+  opts.production ? "prod" : "dev"
 )
+async function installUpdate(version) {
+  console.log(gray(`\n♻ Updating \`next\` to version "${version}"...\n`))
+  await execa("pnpm", ["i", `next@${version}`], { stdio: "inherit" })
+  console.log(gray(`\n\`next\` updated to version "${version}"\n`))
+}
