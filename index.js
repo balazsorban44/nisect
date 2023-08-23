@@ -96,9 +96,11 @@ await search(
   releases.length - 1,
   function onSuccess(foundVersion) {
     if (foundVersion !== null) {
-      console.log(`Success! Found the version: ${foundVersion}`)
+      console.log(
+        `🎉 Success! Check the release notes: https://github.com/vercel/next.js/releases/tag/${foundVersion}`
+      )
     } else {
-      console.log("No matching version found.")
+      console.log("❌ No matching version found.")
     }
   },
   opts.command
