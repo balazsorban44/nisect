@@ -7,6 +7,7 @@ import { Command } from "commander"
 
 import { getReleases } from "./versions.js"
 import { bold, gray } from "yoctocolors"
+import { red } from "yoctocolors"
 
 /** @type {import("execa").ExecaChildProcess<string> | null} */
 let runningChildProcess = null
@@ -52,12 +53,18 @@ async function search(versions, start, end, onSuccess, command) {
       console.log(
         "🏗️ Building with `next build` and start with `next start`...\n"
       )
+
       runningChildProcess = execaCommand("pnpm next build", {
         stdio: "inherit",
       })
-      await runningChildProcess
+      await runningChildProcess.catch((e) => {
+        console.error(red(`Build failed: ${e.message}`))
+      })
       runningChildProcess = execaCommand("pnpm next start", {
         stdio: "inherit",
+      })
+      await runningChildProcess.catch((e) => {
+        console.error(red(`Start failed: ${e.message}`))
       })
     }
   } catch (error) {

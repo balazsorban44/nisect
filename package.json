@@ -27,5 +27,6 @@
   },
   "engines": {
     "node": "^18.17.1"
-  }
+  },
+  "repository": "https://github.com/balazsorban44/nisect.git"
 }
