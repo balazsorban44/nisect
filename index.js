@@ -8,7 +8,7 @@ import { Command } from "commander"
 import { getReleases } from "./versions.js"
 import { bold, gray } from "yoctocolors"
 import { red } from "yoctocolors"
-
+import pkg from "./package.json" assert { type: "json" }
 /** @type {import("execa").ExecaChildProcess<string> | null} */
 let runningChildProcess = null
 let version = null
@@ -90,6 +90,7 @@ const opts = new Command("nisect")
   .option("--per-page <number>", "number of last releases to search in", "100")
   .option("--first", "the first release to start searching in")
   .option("--last", "the last release to end searching in")
+  .version(pkg.version, "-v, -V, --version", "output the current version")
   .parse(process.argv)
   .opts()
 
