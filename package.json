@@ -3,7 +3,7 @@
     "nisect": "./index.js --no-warnings"
   },
   "name": "@balazsorban/nisect",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
   "type": "module",
   "exports": "./index.js",
