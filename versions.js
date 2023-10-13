@@ -11,6 +11,7 @@ export async function getReleases(perPage = 100, start, last) {
     const releases = data.map((release) => release.tag_name).reverse()
     if (start) {
       const startIndex = releases.indexOf(start)
+      // TODO: recursively fetch more releases if the start version is not found
       if (startIndex === -1)
         throw new Error(`Start version "${start}" not found`)
       releases.splice(0, startIndex)
