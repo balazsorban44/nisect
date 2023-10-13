@@ -88,11 +88,13 @@ const opts = new Command("nisect")
   .option("-D, --dev", "run 'next dev'", true)
   .option("-P, --production", "run 'next build && next start'")
   .option("--per-page <number>", "number of last releases to search in", "100")
+  .option("--first", "the first release to start searching in")
+  .option("--last", "the last release to end searching in")
   .parse(process.argv)
   .opts()
 
 console.log("🔎 Searching for the first broken version of Next.js")
-const releases = await getReleases(opts.perPage)
+const releases = await getReleases(opts.perPage, opts.first, opts.last)
 
 await search(
   releases,

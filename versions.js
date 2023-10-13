@@ -2,11 +2,12 @@
 
 import { gray } from "yoctocolors"
 
-export async function getReleases(perPage = 100) {
+export async function getReleases(perPage = 100, start, last) {
   const apiUrl = `https://api.github.com/repos/vercel/next.js/releases?per_page=${perPage}`
   try {
     const response = await fetch(apiUrl)
     const data = await response.json()
+    /** @type {string[]} */
     const releases = data.map((release) => release.tag_name).reverse()
     console.log(
       gray(
@@ -15,6 +16,17 @@ export async function getReleases(perPage = 100) {
         }" and "${releases.at(-1)}"`
       )
     )
+    if (start) {
+      const startIndex = releases.indexOf(start)
+      if (startIndex === -1)
+        throw new Error(`Start version "${start}" not found`)
+      releases.splice(0, startIndex)
+    }
+    if (last) {
+      const endIndex = releases.indexOf(last)
+      if (endIndex === -1) throw new Error(`Last version "${last}" not found`)
+      releases.splice(endIndex + 1)
+    }
     return releases
   } catch (error) {
     console.error(`Error fetching releases: ${error.message}`)
