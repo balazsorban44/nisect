@@ -1,6 +1,6 @@
 {
   "bin": {
-    "nisect": "./index.js"
+    "nisect": "./index.js --no-warnings"
   },
   "name": "@balazsorban/nisect",
   "version": "0.0.7",

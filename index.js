@@ -8,7 +8,12 @@ import { Command } from "commander"
 import { getReleases } from "./versions.js"
 import { bold, gray } from "yoctocolors"
 import { red } from "yoctocolors"
-import pkg from "./package.json" assert { type: "json" }
+
+// import pkg from "./package.json" assert { type: "json" }
+import { readFile } from "fs/promises"
+const url = new URL("package.json", import.meta.url)
+const pkg = JSON.parse(await readFile(url, "utf8"))
+
 /** @type {import("execa").ExecaChildProcess<string> | null} */
 let runningChildProcess = null
 let version = null
@@ -49,6 +54,16 @@ async function search(versions, start, end, onSuccess, command) {
       console.log("🏃 Running `next dev`...\n")
       runningChildProcess = execaCommand("pnpm next dev", { stdio: "inherit" })
       await runningChildProcess
+    } else if (command === "none") {
+      rl.question(
+        `\n❓ Did version "${version}" work? (${bold("y")}/n): `,
+        (answer) => {
+          if (!answer || answer.toLowerCase() === "n") {
+            return search(versions, start, mid - 1, onSuccess, command)
+          }
+          return search(versions, mid + 1, end, onSuccess, command)
+        }
+      )
     } else {
       console.log(
         "🏗️ Building with `next build` and start with `next start`...\n"
@@ -87,9 +102,10 @@ async function search(versions, start, end, onSuccess, command) {
 const opts = new Command("nisect")
   .option("-D, --dev", "run 'next dev'", true)
   .option("-P, --production", "run 'next build && next start'")
+  .option("--run", "run 'next dev' or 'next build && next start", false)
   .option("--per-page <number>", "number of last releases to search in", "100")
-  .option("--first", "the first release to start searching in")
-  .option("--last", "the last release to end searching in")
+  .option("--first <version>", "the first release to start searching in")
+  .option("--last <version>", "the last release to end searching in")
   .version(pkg.version, "-v, -V, --version", "output the current version")
   .parse(process.argv)
   .opts()
@@ -110,7 +126,7 @@ await search(
       console.log("❌ No matching version found.")
     }
   },
-  opts.production ? "prod" : "dev"
+  opts.run === false ? "none" : opts.production ? "prod" : "dev"
 )
 async function installUpdate(version) {
   console.log(gray(`\n♻ Updating \`next\` to version "${version}"...\n`))

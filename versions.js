@@ -9,13 +9,6 @@ export async function getReleases(perPage = 100, start, last) {
     const data = await response.json()
     /** @type {string[]} */
     const releases = data.map((release) => release.tag_name).reverse()
-    console.log(
-      gray(
-        `Got ${releases.length} releases, between "${
-          releases[0]
-        }" and "${releases.at(-1)}"`
-      )
-    )
     if (start) {
       const startIndex = releases.indexOf(start)
       if (startIndex === -1)
@@ -27,6 +20,15 @@ export async function getReleases(perPage = 100, start, last) {
       if (endIndex === -1) throw new Error(`Last version "${last}" not found`)
       releases.splice(endIndex + 1)
     }
+
+    console.log(
+      gray(
+        `Got ${releases.length} releases, between "${
+          releases[0]
+        }" and "${releases.at(-1)}"`
+      )
+    )
+
     return releases
   } catch (error) {
     console.error(`Error fetching releases: ${error.message}`)
